@@ -34,7 +34,7 @@ WiFi Password Cracker is a Python script that retrieves saved WiFi profiles and 
 ## Usage
 1. Open a command prompt or terminal.
 2. Navigate to the directory where the script is located.
-3. Run the script using Python: `python wifi_password_cracker.py`
+3. Run the script using Python: `python main.py`
 4. The script will prompt you to agree to the terms and conditions. Type Y to proceed.
 5. The script will display the WiFi names and their corresponding passwords.
 
