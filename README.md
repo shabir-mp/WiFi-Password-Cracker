@@ -1,10 +1,11 @@
 <p align="center">
-<img src="https://github.com/shabir-mp/WiFi-Password-Cracker/assets/133546000/520a2994-7e4d-4c8b-a426-37ae89955e0a" width="150" />
-<h1 align="center">WiFi Password Cracker v1.0.0</h1>
+<img src="https://github.com/user-attachments/assets/17c844bd-9ad8-480c-8732-84460bb0a31e" width="500" />
+<h1 align="center">WiFi Security & Router Diagnostics v2.0.0</h1>
+<h3 align="center"> - Updated Version of WiFi Password Cracker -</h3>
+   
 </p>
 
-
-WiFi Password Cracker is a Python script that retrieves saved WiFi profiles and their passwords on a Windows machine. It uses the `netsh` command to access and display this information. The script uses the 'netsh' command-line tool to retrieve and display saved WiFi profiles and their passwords on a Windows machine. It includes user interaction to ensure consent before proceeding with the password retrieval. The process_wifi function handles the main logic of extracting and displaying the WiFi names and passwords.
+WiFi Security & Router Diagnostics is a cross-platform Python script that retrieves saved WiFi profiles and their details including passwords, authentication type, encryption, and radio band on Windows, Linux, and macOS. It uses platform-native tools (`netsh` on Windows, NetworkManager on Linux, and Keychain on macOS) to access and display this information. The script includes an interactive menu for filtering, searching, and exporting results, as well as user consent via Terms and Conditions before any data is retrieved.
 
 ## About
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
@@ -12,127 +13,145 @@ WiFi Password Cracker is a Python script that retrieves saved WiFi profiles and 
 
 - **Developer:** Shabir Mahfudz Prahono - @shabir-mp
 - **Application creation date:** 18 June 2024
+- **Last updated:** 17 March 2026
 
 ## Features
 
-- Retrieves all saved WiFi profiles on a Windows machine.
-- Displays the WiFi name and its corresponding password.
+- Cross-platform support: Windows, Linux, and macOS.
+- Retrieves all saved WiFi profiles on the device.
+- Displays WiFi name, password, authentication type, encryption cipher, and radio band.
+- Colorized terminal output — green for profiles with a password, red for those without.
+- Interactive menu with options to browse, search, filter, and export data.
+- Search profiles by name keyword.
+- Filter to show only profiles that have a saved password.
+- Export results to CSV, TXT, or JSON (auto-timestamped filenames).
+- Re-scan profiles without restarting the program.
+- Auto-installs `colorama` if not already present.
 
 ## Requirements
 
-- Windows Operating System
 - Python 3.x
+- `colorama` (auto-installed on first run)
+- **Windows:** No additional requirements
+- **Linux:** NetworkManager (`/etc/NetworkManager/system-connections/`) — requires root for password access
+- **macOS:** `networksetup` and `security` CLI tools (built-in)
 
 ## Installation
 
 1. Clone this repository or download the script directly.
    ```sh
-   git clone https://github.com/yourusername/wifi-password-cracker.git
-   cd wifi-password-cracker
-2. Ensure you have Python installed on your machine. You can download it from python.org.
+   git clone https://github.com/shabir-mp/WiFi-Password-Cracker.git
+   cd WiFi-Password-Cracker
+   ```
+2. Ensure you have Python 3.x installed. You can download it from [python.org](https://www.python.org/).
 
 ## Usage
-1. Open a command prompt or terminal.
-2. Navigate to the directory where the script is located.
-3. Run the script using Python: `python main.py`
-4. The script will prompt you to agree to the terms and conditions. Type Y to proceed.
-5. The script will display the WiFi names and their corresponding passwords.
 
-## Code Explanations
+1. Open a terminal or command prompt.
+2. Navigate to the directory where `main.py` is located.
+3. Run the script:
+   ```sh
+   python main.py
+   ```
+   > **Linux/macOS:** If profiles are not found, run with elevated permissions:
+   > ```sh
+   > sudo python main.py
+   > ```
+4. Read and agree to the Terms and Conditions by typing `Y`.
+5. Use the interactive menu to navigate:
 
-### Importing the Required Module
-```python
-import subprocess
-```
-- **subprocess**: This module allows you to spawn new processes, connect to their input/output/error pipes, and obtain their return codes. It is used here to execute system commands.
+   | Option | Description |
+   |--------|-------------|
+   | `[1]` Show All Profiles | Display all scanned WiFi profiles |
+   | `[2]` Search by Name | Filter profiles by a keyword |
+   | `[3]` Show Only With Password | Display only profiles that have a saved password |
+   | `[4]` Export Results | Save current view to CSV, TXT, or JSON |
+   | `[5]` Re-Scan | Refresh the profile list from the system |
+   | `[0]` Exit | Exit the program |
 
-### Defining the `process_wifi` Function
-The `process_wifi` function retrieves and displays the names and passwords of all saved WiFi profiles on a Windows machine.
+## Code Explanation
 
-```python
-def process_wifi():
-    data = subprocess.check_output(['netsh', 'wlan', 'show', 'profiles']).decode('utf-8').split('\n')
-```
-1. **Fetching WiFi Profiles**:
-    - `subprocess.check_output(['netsh', 'wlan', 'show', 'profiles'])`: Executes the `netsh wlan show profiles` command, which lists all the WiFi profiles saved on the system.
-    - `.decode('utf-8')`: Converts the command output from bytes to a string.
-    - `.split('\n')`: Splits the output string into a list of lines.
-
-```python
-    profiles = [i.split(":")[1][1:-1] for i in data if "All User Profile" in i]
-```
-2. **Extracting Profile Names**:
-    - The list comprehension iterates through each line in `data`.
-    - `if "All User Profile" in i`: Checks if the line contains "All User Profile", which indicates a WiFi profile.
-    - `i.split(":")[1][1:-1]`: Splits the line at the colon, takes the second part (the profile name), and removes leading/trailing spaces and quotes.
+### Dependency Check
 
 ```python
-    for i in profiles:
-        results = subprocess.check_output(['netsh', 'wlan', 'show', 'profile', i, 'key=clear']).decode('utf-8').split('\n')
+def check_dependencies():
+    try:
+        import colorama
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "colorama"])
 ```
-3. **Fetching WiFi Passwords**:
-    - The loop iterates over each profile name in `profiles`.
-    - `subprocess.check_output(['netsh', 'wlan', 'show', 'profile', i, 'key=clear'])`: Executes the `netsh wlan show profile <profile_name> key=clear` command for each profile, which retrieves the details of the profile including the clear text key (password).
-    - `.decode('utf-8').split('\n')`: Decodes and splits the output into lines.
+
+Automatically installs `colorama` if it is not found, so no manual `pip install` is needed before running the script.
+
+### Platform Detection
 
 ```python
-        results = [b.split(":")[1][1:-1] for b in results if "Key Content" in b]
+OS = platform.system()  # "Windows", "Linux", "Darwin"
 ```
-4. **Extracting Passwords**:
-    - Another list comprehension filters lines that contain "Key Content", indicating the presence of the password.
-    - `b.split(":")[1][1:-1]`: Splits the line at the colon, takes the second part (the password), and removes leading/trailing spaces and quotes.
+
+Detects the current operating system and routes all profile retrieval functions accordingly.
+
+### Platform-Specific Parsers
+
+#### Windows : `get_profiles_windows()` / `get_profile_details_windows()`
+
+Uses `netsh wlan show profiles` to list all profiles and `netsh wlan show profile <name> key=clear` to retrieve password, authentication, cipher, and radio band for each profile.
+
+#### Linux : `get_profiles_linux()` / `get_profile_details_linux()`
+
+Reads `.nmconnection` files from `/etc/NetworkManager/system-connections/`. Extracts `psk` (password), `key-mgmt` (auth), `pairwise` (encryption), and `band` fields. Raises a `[Permission Denied]` note if root access is required.
+
+#### macOS : `get_profiles_macos()` / `get_profile_details_macos()`
+
+Uses `networksetup -listpreferredwirelessnetworks en0` to list profiles and `security find-generic-password -wa <name>` to retrieve passwords from the system Keychain.
+
+### Unified Scanner
 
 ```python
-        try:
-            print("{:<30} | {:<}".format(i, results[0]))
-        except IndexError:
-            print("{:<30} | {:<}".format(i, ""))
+def scan_all_profiles():
 ```
-5. **Displaying Results**:
-    - `print("{:<30} | {:<}".format(i, results[0]))`: Prints the profile name and password in a formatted manner.
-    - `except IndexError`: If no password is found, catches the exception and prints the profile name with an empty password field.
 
-### Main Program Execution
-The main part of the script handles user interaction and calls the `process_wifi` function if the user agrees to the terms and conditions.
+Calls the appropriate platform-specific parser and returns a unified list of profile dictionaries with the keys: `name`, `password`, `auth`, `encryption`, `band`.
+
+### Display
 
 ```python
-print("""
-░░     ░░ ░░ ░░░░░░░ ░░      ░░░░░░ ░░░░░░   ░░░░░   ░░░░░░ ░░   ░░ ░░░░░░░ ░░░░░░  
-▒▒     ▒▒ ▒▒ ▒▒      ▒▒     ▒▒      ▒▒   ▒▒ ▒▒   ▒▒ ▒▒      ▒▒  ▒▒  ▒▒      ▒▒   ▒▒ 
-▒▒  ▒  ▒▒ ▒▒ ▒▒▒▒▒   ▒▒     ▒▒      ▒▒▒▒▒▒  ▒▒▒▒▒▒▒ ▒▒      ▒▒▒▒▒   ▒▒▒▒▒   ▒▒▒▒▒▒  
-▓▓ ▓▓▓ ▓▓ ▓▓ ▓▓      ▓▓     ▓▓      ▓▓   ▓▓ ▓▓   ▓▓ ▓▓      ▓▓  ▓▓  ▓▓      ▓▓   ▓▓ 
- ███ ███  ██ ██      ██      ██████ ██   ██ ██   ██  ██████ ██   ██ ███████ ██   ██ 
-
-""")
+def print_table(profiles):
 ```
-- This prints a stylized ASCII art title.
+
+Prints results as a formatted, colorized table. Rows are shown in **green** if a password is found, and **red** if no password is stored.
+
+### Filter / Search
 
 ```python
-print("Wifi Password Cracker")
-print("Copyright 2024 - Shabir Mahfudz Prahono")
-print()
-terms = input("Agree Terms and Conditions ? (Y/n) ")
+def filter_profiles(profiles, keyword=None, with_password_only=False):
 ```
-- Displays the program title and copyright notice.
-- Prompts the user to agree to the terms and conditions.
+
+Filters the profile list by a case-insensitive name keyword and/or by password presence. Used by menu options `[2]` and `[3]`.
+
+### Export
 
 ```python
-if terms.lower() == 'y':
-    print("-"*70)
-    print("WiFi Name                      | WiFi Password")
-    process_wifi()
-else:
-    print("Program End")
-    exit()
+def export_profiles(profiles, fmt):
 ```
-- If the user agrees (`terms.lower() == 'y'`), it prints a header line and calls the `process_wifi` function.
-- If the user does not agree, it prints "Program End" and exits.
 
-### Summary
-The script uses the `netsh` command-line tool to retrieve and display saved WiFi profiles and their passwords on a Windows machine. It includes user interaction to ensure consent before proceeding with the password retrieval. The `process_wifi` function handles the main logic of extracting and displaying the WiFi names and passwords.
+Exports the current profile view to a file. The filename is auto-generated with a timestamp, e.g. `fisard_wifi_export_20260315_143022.csv`. Supports three formats:
+
+- **CSV** — spreadsheet-compatible, one row per profile
+- **TXT** — human-readable, one block per profile
+- **JSON** — structured data, array of profile objects
+
+### Interactive Menu
+
+```python
+def show_menu():
+```
+
+Displays a box-styled menu using Unicode border characters. Returns the user's choice as a string for the main loop to process.
 
 ## Disclaimer
-This script is intended for educational purposes only. Unauthorized access to networks is illegal and unethical. Use this script responsibly and only on networks you own or have permission to access.
+
+This script is intended for educational and personal use only. Unauthorized access to networks or devices you do not own is illegal and unethical. Use this script responsibly and only on devices you own or have explicit permission to access.
 
 ## License
 
